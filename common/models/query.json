@@ -1,0 +1,33 @@
+{
+  "name": "query",
+  "plural": "queries",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "string"
+    },
+    "modified": {
+      "type": "date"
+    },
+    "sensitivity": {
+      "type": "number",
+      "required": true
+    },
+    "params": {
+      "type": "object",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

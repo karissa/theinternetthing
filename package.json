@@ -1,24 +1,31 @@
 {
   "name": "theinternetthing",
   "version": "1.0.0",
-  "description": "the internet thing",
-  "main": "index.js",
+  "main": "server/server.js",
   "scripts": {
-    "test": "node test.js"
+    "watch": "watchify client/index.js -o client/bundle.js",
+    "build": "browserify client/index.js -o client/bundle.js",
+    "start": "node .",
+    "pretest": "standard"
+  },
+  "dependencies": {
+    "compression": "^1.0.3",
+    "cors": "^2.5.2",
+    "loopback": "^2.22.0",
+    "loopback-boot": "^2.6.5",
+    "loopback-component-explorer": "^2.1.0",
+    "loopback-connector-sqlite": "^1.1.0",
+    "loopback-datasource-juggler": "^2.39.0",
+    "serve-favicon": "^2.0.1"
+  },
+  "devDependencies": {
+    "browserify": "^11.2.0",
+    "standard": "^5.3.1",
+    "watchify": "^3.4.0"
   },
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/karissa/theinternetthing.git"
+    "type": "",
+    "url": ""
   },
-  "keywords": [
-    "the",
-    "internet",
-    "thing"
-  ],
-  "author": "Karissa McKelvey <karissa@karissamck.com> (http://karissamck.com/)",
-  "license": "BSD-2-Clause",
-  "bugs": {
-    "url": "https://github.com/karissa/theinternetthing/issues"
-  },
-  "homepage": "https://github.com/karissa/theinternetthing#readme"
+  "description": "theinternetthing"
 }

@@ -1,0 +1,25 @@
+{
+  "db": {
+    "name": "db",
+    "connector": "sqlite"
+  },
+  "myEmailDataSource": {
+    "name": "myEmailDataSource",
+    "connector": "mail",
+    "transports": [
+      {
+        "type": "smtp",
+        "host": "smtp.private.com",
+        "secure": false,
+        "port": 587,
+        "tls": {
+          "rejectUnauthorized": false
+        },
+        "auth": {
+          "user": "noreply@theinternetthing.com",
+          "pass": "password"
+        }
+      }
+    ]
+  }
+}
