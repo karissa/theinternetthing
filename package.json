@@ -1,0 +1,24 @@
+{
+  "name": "theinternetthing",
+  "version": "1.0.0",
+  "description": "the internet thing",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/karissa/theinternetthing.git"
+  },
+  "keywords": [
+    "the",
+    "internet",
+    "thing"
+  ],
+  "author": "Karissa McKelvey <karissa@karissamck.com> (http://karissamck.com/)",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/karissa/theinternetthing/issues"
+  },
+  "homepage": "https://github.com/karissa/theinternetthing#readme"
+}
