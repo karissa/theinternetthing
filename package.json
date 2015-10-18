@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "main": "server/server.js",
   "scripts": {
-    "watch": "watchify client/index.js -o client/bundle.js",
-    "build": "browserify client/index.js -o client/bundle.js",
+    "watch": "watchify -t brfs client/index.js -o client/bundle.js",
+    "build": "browserify -t brfs client/index.js -o client/bundle.js",
     "start": "node .",
     "pretest": "standard"
   },
   "dependencies": {
+    "brfs": "^1.4.1",
     "compression": "^1.0.3",
     "cors": "^2.5.2",
     "loopback": "^2.22.0",
@@ -16,6 +17,7 @@
     "loopback-component-explorer": "^2.1.0",
     "loopback-connector-sqlite": "^1.1.0",
     "loopback-datasource-juggler": "^2.39.0",
+    "page-router": "^1.0.9",
     "serve-favicon": "^2.0.1"
   },
   "devDependencies": {
