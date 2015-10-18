@@ -1,6 +1,6 @@
 <h1>Active Queries</h1>
 
-<a href="/query">Create new</a>
+<a href="/query/new">Create new</a>
 
 {{#each queries}}
 <hr>
@@ -15,6 +15,6 @@
 <p>{{this.value}}</p>
 {{/each}}
 <a href="#" on-click="delete:{{this.id}}">delete</a>
-<a href="#" on-click="edit:{{this.id}}">edit</a>
+<a href="/query/{{this.id}}">edit</a>
 <hr>
 {{/each}}
