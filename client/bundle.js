@@ -2521,7 +2521,7 @@ module.exports={
   page.sameOrigin = sameOrigin;
 
 }).call(this,require('_process'))
-},{"_process":28,"path-to-regexp":13}],13:[function(require,module,exports){
+},{"_process":29,"path-to-regexp":13}],13:[function(require,module,exports){
 var isArray = require('isarray');
 
 /**
@@ -19478,7 +19478,7 @@ var enter = require('enter-means-submit')
 
 var routes = [
   require('./routes/home.js'),
-  require('./routes/new-query.js')
+  require('./routes/query.js')
 ]
 
 enter(document.getElementsByClassName('enter-means-submit'))
@@ -19492,10 +19492,61 @@ router('#content', routes, function (ctx) {
   })
 })
 
-},{"./routes/home.js":21,"./routes/new-query.js":22,"enter-means-submit":1,"page-router":2,"path":27,"ractive-toolkit":15}],21:[function(require,module,exports){
+},{"./routes/home.js":22,"./routes/query.js":23,"enter-means-submit":1,"page-router":2,"path":28,"ractive-toolkit":15}],21:[function(require,module,exports){
+var xhr = require('xhr')
+
+function REST (model) {
+  if (!(this instanceof REST)) return new REST(model)
+  this.url = '/api/' + model
+}
+
+REST.prototype.get = function (id, cb) {
+  var opts = {
+    url: this.url + '/' + id,
+    method: 'GET',
+    json: true
+  }
+
+  xhr(opts, cb)
+}
+
+REST.prototype.all = function (cb) {
+  var opts = {
+    url: this.url,
+    method: 'GET',
+    json: true
+  }
+
+  xhr(opts, cb)
+}
+
+REST.prototype.post = function (data, cb) {
+  var opts = {
+    url: this.url,
+    method: 'POST',
+    json: data
+  }
+
+  xhr(opts, cb)
+}
+
+REST.prototype.put = function (id, data, cb) {
+  var opts = {
+    url: this.url + '/' + id,
+    method: 'PUT',
+    json: data
+  }
+
+  xhr(opts, cb)
+}
+
+module.exports = REST
+
+},{"xhr":30}],22:[function(require,module,exports){
 (function (Buffer){
 
 var path = require('path')
+var queries = require('../models')('queries')
 var xhr = require('xhr')
 
 module.exports = {
@@ -19503,31 +19554,20 @@ module.exports = {
   template: Buffer("PGgxPkFjdGl2ZSBRdWVyaWVzPC9oMT4KCjxhIGhyZWY9Ii9xdWVyeS9uZXciPkNyZWF0ZSBuZXc8L2E+Cgp7eyNlYWNoIHF1ZXJpZXN9fQo8aHI+CjxoMj57e3RoaXMubmFtZX19PC9oMj4KPHA+e3t0aGlzLmRlc2NyaXB0aW9ufX08L3A+CjxoMz5JbmNsdWRlczo8L2gzPgp7eyNlYWNoIHRoaXMucGFyYW1zLmluY2x1ZGVzfX0KPHA+e3t0aGlzLnZhbHVlfX08L3A+Cnt7L2VhY2h9fQo8aDM+RXhjbHVkZXM6PC9oMz4Ke3sjZWFjaCB0aGlzLnBhcmFtcy5leGNsdWRlc319CjxwPnt7dGhpcy52YWx1ZX19PC9wPgp7ey9lYWNofX0KPGEgaHJlZj0iIyIgb24tY2xpY2s9ImRlbGV0ZTp7e3RoaXMuaWR9fSI+ZGVsZXRlPC9hPgo8YSBocmVmPSIvcXVlcnkve3t0aGlzLmlkfX0iPmVkaXQ8L2E+Cjxocj4Ke3svZWFjaH19Cg==","base64").toString(),
   onrender: function () {
     var self = this
-    function queries () {
-      var opts = {
-        method: 'GET',
-        url: '/api/queries',
-        json: true
-      }
-      xhr(opts, function (err, resp, data) {
-        if (err) return console.error(err)
+    function all () {
+      queries.all(function (err, resp, data) {
         self.set('queries', data)
       })
     }
 
     // get all queries
-    queries()
+    all()
 
     self.on('delete', function (event, id) {
       console.log(arguments)
-      var opts = {
-        method: 'DELETE',
-        url: '/api/queries/' + id,
-        json: true
-      }
-      xhr(opts, function (err, resp, data) {
+      queries.delete(id, function (err, resp, data) {
         if (err) return console.error(err)
-        queries()
+        all()
       })
       event.original.preventDefault()
     })
@@ -19535,26 +19575,33 @@ module.exports = {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":23,"path":27,"xhr":29}],22:[function(require,module,exports){
+},{"../models":21,"buffer":24,"path":28,"xhr":30}],23:[function(require,module,exports){
 (function (Buffer){
 
 var path = require('path')
 var xhr = require('xhr')
+var queries = require('../models')('queries')
 
 var includes = []
 var excludes = []
 
 module.exports = {
-  url: '/query',
+  url: '/query/:id',
   data: function (params, cb) {
-    cb({
+    var data = {
       includes: includes,
       excludes: excludes
+    }
+    if (params.id === 'new') return cb(data)
+    queries.get(params.id, function (err, resp, query) {
+      data.query = query
+      cb(data)
     })
   },
-  template: Buffer("PGgxPk5ldyBxdWVyeTwvaDE+Cgo8YSBocmVmPSIvIj52aWV3IGFsbCBxdWVyaWVzPC9hPgoKPGZvcm0gY2xhc3M9ImVudGVyLW1lYW5zLXN1Ym1pdCI+CjxoMj5JbmNsdWRlIGtleXdvcmRzOjwvaDI+Cnt7I2VhY2ggaW5jbHVkZXN9fQo8aW5wdXQgdHlwZT0idGV4dCIgcGxhY2Vob2xkZXI9IlZhbHVlIiBuYW1lPSJpbmNsdWRlIiB2YWx1ZT0ie3t0aGlzLnZhbHVlfX0iLz4Ke3svZWFjaH19CjxpbnB1dCB0eXBlPSJ0ZXh0IiBwbGFjZWhvbGRlcj0iVmFsdWUiIHZhbHVlPSJ7e25ld0luY2x1ZGV9fSIvPgo8YnV0dG9uIHR5cGU9InN1Ym1pdCIgb24tY2xpY2s9ImluY2x1ZGUiPkFkZDwvYnV0dG9uPgo8L2Zvcm0+Cgo8Zm9ybSBjbGFzcz0iZW50ZXItbWVhbnMtc3VibWl0Ij4KPGgyPkV4Y2x1ZGUga2V5d29yZHM6PC9oMj4Ke3sjZWFjaCBleGNsdWRlc319CjxpbnB1dCB0eXBlPSJ0ZXh0IiBwbGFjZWhvbGRlcj0iVmFsdWUiIHZhbHVlPSJ7e3RoaXMudmFsdWV9fSIvPgp7ey9lYWNofX0KPGlucHV0IHR5cGU9InRleHQiIHBsYWNlaG9sZGVyPSJWYWx1ZSIgbmFtZT0iZXhjbHVkZSIgdmFsdWU9Int7bmV3RXhjbHVkZX19Ii8+CjxidXR0b24gdHlwZT0ic3VibWl0IiBvbi1jbGljaz0iZXhjbHVkZSI+QWRkPC9idXR0b24+CjwvZm9ybT4KCnt7I2lmIHNob3dTcWx9fQo8aDI+U1FMIHF1ZXJ5OjwvaDI+Cjx0ZXh0YXJlYSBuYW1lPSIiIHZhbHVlPXt7c3FsfX0+CjwvdGV4dGFyZWE+CjxidXR0b24gdHlwZT0ic3VibWl0IiBvbi1jbGljaz0idXNlU1FMIj5TdWJtaXQ8L2J1dHRvbj4Ke3svaWZ9fQoKPGRpdiBjbGFzcz0icm93Ij4KPGJ1dHRvbiB0eXBlPSJzdWJtaXQiIG9uLWNsaWNrPSJkb25lIj5Eb25lPC9idXR0b24+CjwvZGl2Pgo=","base64").toString(),
+  template: Buffer("PGgxPk5ldyBxdWVyeTwvaDE+Cgo8YSBocmVmPSIvIj52aWV3IGFsbCBxdWVyaWVzPC9hPgoKPGgyPk5hbWU6PC9oMj4KPGlucHV0IHR5cGU9InRleHQiIHBsYWNlaG9sZGVyPSJOYW1lIiBuYW1lPSJuYW1lIiB2YWx1ZT0ie3tuYW1lfX0iLz4KCjxmb3JtIGNsYXNzPSJlbnRlci1tZWFucy1zdWJtaXQiPgo8aDI+SW5jbHVkZSBrZXl3b3Jkczo8L2gyPgp7eyNlYWNoIGluY2x1ZGVzfX0KPGlucHV0IHR5cGU9InRleHQiIHBsYWNlaG9sZGVyPSJWYWx1ZSIgbmFtZT0iaW5jbHVkZSIgdmFsdWU9Int7dGhpcy52YWx1ZX19Ii8+Cnt7L2VhY2h9fQo8aW5wdXQgdHlwZT0idGV4dCIgcGxhY2Vob2xkZXI9IlZhbHVlIiB2YWx1ZT0ie3tuZXdJbmNsdWRlfX0iLz4KPGJ1dHRvbiB0eXBlPSJzdWJtaXQiIG9uLWNsaWNrPSJpbmNsdWRlIj5BZGQ8L2J1dHRvbj4KPC9mb3JtPgoKPGZvcm0gY2xhc3M9ImVudGVyLW1lYW5zLXN1Ym1pdCI+CjxoMj5FeGNsdWRlIGtleXdvcmRzOjwvaDI+Cnt7I2VhY2ggZXhjbHVkZXN9fQo8aW5wdXQgdHlwZT0idGV4dCIgcGxhY2Vob2xkZXI9IlZhbHVlIiB2YWx1ZT0ie3t0aGlzLnZhbHVlfX0iLz4Ke3svZWFjaH19CjxpbnB1dCB0eXBlPSJ0ZXh0IiBwbGFjZWhvbGRlcj0iVmFsdWUiIG5hbWU9ImV4Y2x1ZGUiIHZhbHVlPSJ7e25ld0V4Y2x1ZGV9fSIvPgo8YnV0dG9uIHR5cGU9InN1Ym1pdCIgb24tY2xpY2s9ImV4Y2x1ZGUiPkFkZDwvYnV0dG9uPgo8L2Zvcm0+Cgp7eyNpZiBzaG93U3FsfX0KPGgyPlNRTCBxdWVyeTo8L2gyPgo8dGV4dGFyZWEgbmFtZT0iIiB2YWx1ZT17e3NxbH19Pgo8L3RleHRhcmVhPgo8YnV0dG9uIHR5cGU9InN1Ym1pdCIgb24tY2xpY2s9InVzZVNRTCI+U3VibWl0PC9idXR0b24+Cnt7L2lmfX0KCjxkaXYgY2xhc3M9InJvdyI+CjxidXR0b24gdHlwZT0ic3VibWl0IiBvbi1jbGljaz0iZG9uZSI+RG9uZTwvYnV0dG9uPgo8L2Rpdj4K","base64").toString(),
   onrender: function () {
     var self = this
+
     function Keyword (value) {
       return {value: value}
     }
@@ -19578,16 +19625,12 @@ module.exports = {
     self.on('done', function () {
       var data = {
         params: {
+          name: self.get('name'),
           includes: self.get('includes'),
           excludes: self.get('excludes')
         }
       }
-      var opts = {
-        uri: '/api/queries',
-        method: 'POST',
-        json: data
-      }
-      xhr(opts, function (err, resp, body) {
+      queries.post(data, function (err, resp, body) {
         if (err) console.error(err)
         self.set('includes', [])
         self.set('excludes', [])
@@ -19597,7 +19640,7 @@ module.exports = {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":23,"path":27,"xhr":29}],23:[function(require,module,exports){
+},{"../models":21,"buffer":24,"path":28,"xhr":30}],24:[function(require,module,exports){
 (function (global){
 /*!
  * The buffer module from node.js, for the browser.
@@ -21145,7 +21188,7 @@ function blitBuffer (src, dst, offset, length) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"base64-js":24,"ieee754":25,"is-array":26}],24:[function(require,module,exports){
+},{"base64-js":25,"ieee754":26,"is-array":27}],25:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -21271,7 +21314,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -21357,7 +21400,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 
 /**
  * isArray
@@ -21392,7 +21435,7 @@ module.exports = isArray || function (val) {
   return !! val && '[object Array]' == str.call(val);
 };
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -21620,7 +21663,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":28}],28:[function(require,module,exports){
+},{"_process":29}],29:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -21713,7 +21756,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 "use strict";
 var window = require("global/window")
 var once = require("once")
@@ -21904,7 +21947,7 @@ function createXHR(options, callback) {
 
 function noop() {}
 
-},{"global/window":30,"once":31,"parse-headers":35}],30:[function(require,module,exports){
+},{"global/window":31,"once":32,"parse-headers":36}],31:[function(require,module,exports){
 (function (global){
 if (typeof window !== "undefined") {
     module.exports = window;
@@ -21917,7 +21960,7 @@ if (typeof window !== "undefined") {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 module.exports = once
 
 once.proto = once(function () {
@@ -21938,7 +21981,7 @@ function once (fn) {
   }
 }
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 var isFunction = require('is-function')
 
 module.exports = forEach
@@ -21986,7 +22029,7 @@ function forEachObject(object, iterator, context) {
     }
 }
 
-},{"is-function":33}],33:[function(require,module,exports){
+},{"is-function":34}],34:[function(require,module,exports){
 module.exports = isFunction
 
 var toString = Object.prototype.toString
@@ -22003,7 +22046,7 @@ function isFunction (fn) {
       fn === window.prompt))
 };
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 
 exports = module.exports = trim;
 
@@ -22019,7 +22062,7 @@ exports.right = function(str){
   return str.replace(/\s*$/, '');
 };
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 var trim = require('trim')
   , forEach = require('for-each')
   , isArray = function(arg) {
@@ -22051,4 +22094,4 @@ module.exports = function (headers) {
 
   return result
 }
-},{"for-each":32,"trim":34}]},{},[20]);
+},{"for-each":33,"trim":35}]},{},[20]);

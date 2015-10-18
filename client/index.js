@@ -6,7 +6,7 @@ var enter = require('enter-means-submit')
 
 var routes = [
   require('./routes/home.js'),
-  require('./routes/new-query.js')
+  require('./routes/query.js')
 ]
 
 enter(document.getElementsByClassName('enter-means-submit'))

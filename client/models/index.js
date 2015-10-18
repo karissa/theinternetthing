@@ -1,18 +1,48 @@
-module.exports = REST
+var xhr = require('xhr')
 
 function REST (model) {
-
+  if (!(this instanceof REST)) return new REST(model)
+  this.url = '/api/' + model
 }
 
-REST.prototype.get = function (id) {
+REST.prototype.get = function (id, cb) {
+  var opts = {
+    url: this.url + '/' + id,
+    method: 'GET',
+    json: true
+  }
 
+  xhr(opts, cb)
 }
 
-REST.prototype.all = function (id) {
+REST.prototype.all = function (cb) {
+  var opts = {
+    url: this.url,
+    method: 'GET',
+    json: true
+  }
+
+  xhr(opts, cb)
 }
 
-REST.prototype.post = function (id) {
-}
-REST.prototype.put = function (id) {
+REST.prototype.post = function (data, cb) {
+  var opts = {
+    url: this.url,
+    method: 'POST',
+    json: data
+  }
 
+  xhr(opts, cb)
 }
+
+REST.prototype.put = function (id, data, cb) {
+  var opts = {
+    url: this.url + '/' + id,
+    method: 'PUT',
+    json: data
+  }
+
+  xhr(opts, cb)
+}
+
+module.exports = REST

@@ -1,7 +1,7 @@
 var fs = require('fs')
 var path = require('path')
 var xhr = require('xhr')
-var queries = require('../models')
+var queries = require('../models')('queries')
 
 var includes = []
 var excludes = []
@@ -14,12 +14,12 @@ module.exports = {
       excludes: excludes
     }
     if (params.id === 'new') return cb(data)
-    queries.get(params.id, function (query) {
+    queries.get(params.id, function (err, resp, query) {
       data.query = query
       cb(data)
     })
   },
-  template: fs.readFileSync(path.join(__dirname, '../templates/new-query.html')).toString(),
+  template: fs.readFileSync(path.join(__dirname, '../templates/query.html')).toString(),
   onrender: function () {
     var self = this
 
@@ -46,16 +46,12 @@ module.exports = {
     self.on('done', function () {
       var data = {
         params: {
+          name: self.get('name'),
           includes: self.get('includes'),
           excludes: self.get('excludes')
         }
       }
-      var opts = {
-        uri: '/api/queries',
-        method: 'POST',
-        json: data
-      }
-      xhr(opts, function (err, resp, body) {
+      queries.post(data, function (err, resp, body) {
         if (err) console.error(err)
         self.set('includes', [])
         self.set('excludes', [])

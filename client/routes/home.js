@@ -1,5 +1,6 @@
 var fs = require('fs')
 var path = require('path')
+var queries = require('../models')('queries')
 var xhr = require('xhr')
 
 module.exports = {
@@ -7,31 +8,20 @@ module.exports = {
   template: fs.readFileSync(path.join(__dirname, '../templates/home.html')).toString(),
   onrender: function () {
     var self = this
-    function queries () {
-      var opts = {
-        method: 'GET',
-        url: '/api/queries',
-        json: true
-      }
-      xhr(opts, function (err, resp, data) {
-        if (err) return console.error(err)
+    function all () {
+      queries.all(function (err, resp, data) {
         self.set('queries', data)
       })
     }
 
     // get all queries
-    queries()
+    all()
 
     self.on('delete', function (event, id) {
       console.log(arguments)
-      var opts = {
-        method: 'DELETE',
-        url: '/api/queries/' + id,
-        json: true
-      }
-      xhr(opts, function (err, resp, data) {
+      queries.delete(id, function (err, resp, data) {
         if (err) return console.error(err)
-        queries()
+        all()
       })
       event.original.preventDefault()
     })
