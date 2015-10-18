@@ -8,18 +8,13 @@
   },
   "properties": {
     "name": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "description": {
       "type": "string"
     },
     "modified": {
       "type": "date"
-    },
-    "sensitivity": {
-      "type": "number",
-      "required": true
     },
     "params": {
       "type": "object",
