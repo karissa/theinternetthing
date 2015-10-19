@@ -14,5 +14,5 @@ npm run watch
 in another window:
 
 ```
-npm run start
+npm start
 ```
