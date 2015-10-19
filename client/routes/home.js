@@ -1,7 +1,6 @@
 var fs = require('fs')
 var path = require('path')
 var queries = require('../models')('queries')
-var xhr = require('xhr')
 
 module.exports = {
   url: '/',
@@ -10,6 +9,7 @@ module.exports = {
     var self = this
     function all () {
       queries.all(function (err, resp, data) {
+        if (err) return console.error(err)
         self.set('queries', data)
       })
     }
@@ -18,7 +18,6 @@ module.exports = {
     all()
 
     self.on('delete', function (event, id) {
-      console.log(arguments)
       queries.delete(id, function (err, resp, data) {
         if (err) return console.error(err)
         all()

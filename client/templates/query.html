@@ -3,11 +3,11 @@
 <a href="/">view all queries</a>
 
 <h2>Name:</h2>
-<input type="text" placeholder="Name" name="name" value="{{name}}"/>
+<input type="text" placeholder="Name" name="name" value="{{query.name}}"/>
 
 <form class="enter-means-submit">
 <h2>Include keywords:</h2>
-{{#each includes}}
+{{#each query.params.includes}}
 <input type="text" placeholder="Value" name="include" value="{{this.value}}"/>
 {{/each}}
 <input type="text" placeholder="Value" value="{{newInclude}}"/>
@@ -16,7 +16,7 @@
 
 <form class="enter-means-submit">
 <h2>Exclude keywords:</h2>
-{{#each excludes}}
+{{#each query.params.excludes}}
 <input type="text" placeholder="Value" value="{{this.value}}"/>
 {{/each}}
 <input type="text" placeholder="Value" name="exclude" value="{{newExclude}}"/>
@@ -25,7 +25,7 @@
 
 {{#if showSql}}
 <h2>SQL query:</h2>
-<textarea name="" value={{sql}}>
+<textarea name="" value={{query.params.sql}}>
 </textarea>
 <button type="submit" on-click="useSQL">Submit</button>
 {{/if}}

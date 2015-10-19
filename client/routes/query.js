@@ -1,22 +1,29 @@
 var fs = require('fs')
 var path = require('path')
-var xhr = require('xhr')
 var queries = require('../models')('queries')
 
-var includes = []
-var excludes = []
+function Query () {
+  return {
+    name: '',
+    params: {
+      includes: [],
+      excludes: []
+    }
+  }
+}
+
+var query = Query()
 
 module.exports = {
   url: '/query/:id',
   data: function (params, cb) {
-    var data = {
-      includes: includes,
-      excludes: excludes
-    }
+    var data = {query: query}
     if (params.id === 'new') return cb(data)
-    queries.get(params.id, function (err, resp, query) {
-      data.query = query
-      cb(data)
+    queries.get(params.id, function (err, resp, body) {
+      if (err) console.error(err)
+      console.log(query)
+      query = body
+      cb({query: query})
     })
   },
   template: fs.readFileSync(path.join(__dirname, '../templates/query.html')).toString(),
@@ -29,14 +36,14 @@ module.exports = {
 
     self.on('include', function (event) {
       var value = self.get('newInclude')
-      includes.push(Keyword(value))
+      query.params.includes.push(Keyword(value))
       self.set('newInclude', null)
       event.original.preventDefault()
     })
 
     self.on('exclude', function (event) {
       var value = self.get('newExclude')
-      excludes.push(Keyword(value))
+      query.params.excludes.push(Keyword(value))
       self.set('newExclude', null)
       event.original.preventDefault()
     })
@@ -44,18 +51,14 @@ module.exports = {
     self.set('sql', "select * from tweets where text match '*@theinternetthing'")
 
     self.on('done', function () {
-      var data = {
-        params: {
-          name: self.get('name'),
-          includes: self.get('includes'),
-          excludes: self.get('excludes')
-        }
-      }
-      queries.post(data, function (err, resp, body) {
+      queries.post(query, function (err, resp, body) {
         if (err) console.error(err)
-        self.set('includes', [])
-        self.set('excludes', [])
+        done()
       })
     })
+
+    function done () {
+      window.location.href = '/'
+    }
   }
 }

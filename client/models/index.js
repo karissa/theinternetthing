@@ -26,6 +26,7 @@ REST.prototype.all = function (cb) {
 }
 
 REST.prototype.post = function (data, cb) {
+  if (data.id) return this.put(data, cb)
   var opts = {
     url: this.url,
     method: 'POST',
@@ -35,9 +36,9 @@ REST.prototype.post = function (data, cb) {
   xhr(opts, cb)
 }
 
-REST.prototype.put = function (id, data, cb) {
+REST.prototype.put = function (data, cb) {
   var opts = {
-    url: this.url + '/' + id,
+    url: this.url,
     method: 'PUT',
     json: data
   }
@@ -45,4 +46,13 @@ REST.prototype.put = function (id, data, cb) {
   xhr(opts, cb)
 }
 
+REST.prototype.delete = function (id, cb) {
+  var opts = {
+    url: this.url + '/' + id,
+    method: 'DELETE',
+    json: true
+  }
+
+  xhr(opts, cb)
+}
 module.exports = REST
