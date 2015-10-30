@@ -14,17 +14,19 @@ function Query () {
 
 var query = Query()
 
+function updateQuery (id, cb) {
+  queries.get(id, function (err, resp, body) {
+    if (err) console.error(err)
+    query = body
+    cb({query: query})
+  })
+}
 module.exports = {
   url: '/query/:id',
   data: function (params, cb) {
     var data = {query: query}
     if (params.id === 'new') return cb(data)
-    queries.get(params.id, function (err, resp, body) {
-      if (err) console.error(err)
-      console.log(query)
-      query = body
-      cb({query: query})
-    })
+    updateQuery(params.id, cb)
   },
   template: fs.readFileSync(path.join(__dirname, '../templates/query.html')).toString(),
   onrender: function () {
@@ -48,7 +50,17 @@ module.exports = {
       event.original.preventDefault()
     })
 
-    self.set('sql', "select * from tweets where text match '*@theinternetthing'")
+    function pingTweets () {
+      var query = self.get('query')
+      if (!query.running) return
+      queries.call('GET', query.id + '/tweets?filter[order]=id%20desc', function (err, resp, data) {
+        if (err) return console.error(err)
+        self.set('tweets', data)
+        setTimeout(pingTweets, 2000)
+      })
+    }
+
+    pingTweets()
 
     self.on('done', function () {
       queries.post(query, function (err, resp, body) {
@@ -56,6 +68,23 @@ module.exports = {
         done()
       })
     })
+
+    self.on('stop', function (event, id) {
+      queries.call('GET', 'stop?id=' + id, function (err, resp, data) {
+        if (err) return console.error(err)
+        query.running = false
+      })
+      event.original.preventDefault()
+    })
+
+    self.on('start', function (event, id) {
+      queries.call('GET', 'start?id=' + id, function (err, resp, data) {
+        if (err) return console.error(err)
+        query.running = true
+      })
+      event.original.preventDefault()
+    })
+
 
     function done () {
       window.location.href = '/'

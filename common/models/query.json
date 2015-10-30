@@ -13,6 +13,11 @@
     "description": {
       "type": "string"
     },
+    "running": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
     "modified": {
       "type": "date"
     },
@@ -22,7 +27,13 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "tweets": {
+      "type": "hasMany",
+      "model": "tweets",
+      "foreignKey": ""
+    }
+  },
   "acls": [],
   "methods": {}
 }

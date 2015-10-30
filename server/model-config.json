@@ -14,29 +14,33 @@
     ]
   },
   "User": {
-    "dataSource": "db"
+    "dataSource": "postgresql"
   },
   "AccessToken": {
-    "dataSource": "db",
+    "dataSource": "postgresql",
     "public": false
   },
   "ACL": {
-    "dataSource": "db",
+    "dataSource": "postgresql",
     "public": false
   },
   "RoleMapping": {
-    "dataSource": "db",
+    "dataSource": "postgresql",
     "public": false
   },
   "Role": {
-    "dataSource": "db",
+    "dataSource": "postgresql",
     "public": false
   },
   "Email": {
     "dataSource": "myEmailDataSource"
   },
   "query": {
-    "dataSource": "db",
+    "dataSource": "postgresql",
+    "public": true
+  },
+  "tweets": {
+    "dataSource": "postgresql",
     "public": true
   }
 }

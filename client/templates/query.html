@@ -33,3 +33,14 @@
 <div class="row">
 <button type="submit" on-click="done">Done</button>
 </div>
+
+{{#if query.running}}
+<a href="#" on-click="stop:{{query.id}}">stop</a>
+{{else}}
+<a href="#" on-click="start:{{query.id}}">start</a>
+{{/if}}
+
+<h3>{{tweets.length}} tweets</h3>
+{{#each tweets}}
+  <p>{{this.data.created_at}} | {{this.data.text}}</p>
+{{/each}}

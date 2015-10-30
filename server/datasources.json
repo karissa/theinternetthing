@@ -3,9 +3,16 @@
     "name": "db",
     "connector": "memory"
   },
-  "sqlite": {
-    "name": "sqlite",
-    "connector": "sqlite"
+  "postgresql": {
+    "name": "postgresql",
+    "host": "127.0.0.1",
+    "port": "5432",
+    "database": "theinternetthing",
+    "username": "theinternetthing",
+    "password": "theinternetthing",
+    "name": "postgres",
+    "debug": true,
+    "connector": "postgresql"
   },
   "myEmailDataSource": {
     "name": "myEmailDataSource",

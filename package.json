@@ -18,7 +18,7 @@
     "loopback-component-explorer": "^2.1.0",
     "loopback-connector-sqlite": "^1.1.0",
     "loopback-datasource-juggler": "^2.39.0",
-    "page-router": "^1.0.9",
+    "page-router": "^2.0.0",
     "ractive-toolkit": "^1.0.2",
     "serve-favicon": "^2.0.1",
     "xhr": "^2.1.0"

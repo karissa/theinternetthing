@@ -16,5 +16,10 @@
 {{/each}}
 <a href="#" on-click="delete:{{this.id}}">delete</a>
 <a href="/query/{{this.id}}">edit</a>
+{{#if this.running}}
+<a href="#" on-click="stop:{{this.id}}">stop</a>
+{{else}}
+<a href="#" on-click="start:{{this.id}}">start</a>
+{{/if}}
 <hr>
 {{/each}}

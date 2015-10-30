@@ -55,4 +55,17 @@ REST.prototype.delete = function (id, cb) {
 
   xhr(opts, cb)
 }
+
+REST.prototype.call = function (method, path, data, cb) {
+  if (typeof data === 'function') return this.call(method, path, null, data)
+
+  var opts = {
+    url: this.url + '/' + path,
+    method: method,
+    json: data || true
+  }
+
+  xhr(opts, cb)
+}
+
 module.exports = REST
