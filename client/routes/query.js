@@ -12,7 +12,7 @@ function Query () {
   }
 }
 
-var query = Query()
+var query = null
 
 function updateQuery (id, cb) {
   queries.get(id, function (err, resp, body) {
@@ -24,6 +24,7 @@ function updateQuery (id, cb) {
 module.exports = {
   url: '/query/:id',
   data: function (params, cb) {
+    query = Query()
     var data = {query: query}
     if (params.id === 'new') return cb(data)
     updateQuery(params.id, cb)

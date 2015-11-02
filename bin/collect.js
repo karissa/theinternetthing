@@ -1,4 +1,4 @@
-var server = require('./server/server.js')
+var server = require('../server/server.js')
 var Twitter = require('twitter')
 
 var client = new Twitter({
@@ -11,11 +11,13 @@ var client = new Twitter({
 var Query = server.models.Query
 Query.find({ where: { running: 'true' } }, function (err, queries) {
   if (err) throw err
+  console.log('queries', queries)
   for (var i in queries) {
     var query = queries[i]
     var includes = query.params.includes.map(function (item) { return item.value })
     var text = includes.join(',')
     client.stream('statuses/filter', {track: text}, function (stream) {
+      console.log('streaming on ',text)
       stream.on('data', function (data) {
         var tweet = {
           text: data.text,
