@@ -16,3 +16,9 @@ in another window:
 ```
 npm start
 ```
+
+in another another window:
+
+```
+node bin/collect.js
+```
