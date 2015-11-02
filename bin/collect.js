@@ -1,5 +1,12 @@
-var server = require('../server/server.js')
+var from = require('from2')
+var pump = require('pump')
+var through = require('through2')
 var Twitter = require('twitter')
+var debug = require('debug')('theinternetthing')
+
+var convert = require('./convert.js')
+var server = require('../server/server.js')
+var rate = require('./rate.js')
 
 var client = new Twitter({
   consumer_key: process.env.TWITTER_KEY,
@@ -11,35 +18,55 @@ var client = new Twitter({
 var Query = server.models.Query
 Query.find({ where: { running: 'true' } }, function (err, queries) {
   if (err) throw err
-  console.log('queries', queries)
   for (var i in queries) {
     var query = queries[i]
     var includes = query.params.includes.map(function (item) { return item.value })
-    var text = includes.join(',')
-    client.stream('statuses/filter', {track: text}, function (stream) {
-      console.log('streaming on ',text)
-      stream.on('data', function (data) {
-        var tweet = {
-          text: data.text,
-          created_at: data.created_at,
-          id: data.id,
-          coordinates: data.coordinates,
-          in_reply_to_status_id: data.in_reply_to_status_id,
-          in_reply_to_user_id: data.in_reply_to_user_id,
-          user: {
-            id: data.user.id,
-            followers_count: data.user.followers_count,
-            friends_count: data.user.friends_count
-          }
-        }
-        queries[0].tweets.create({data: tweet}, function (err, tweet) {
-          if (err) return console.error(err)
-        })
-      })
-      stream.on('error', function (error) {
-        console.error(error)
-      })
-    })
-
+    var opts = {
+      q: includes.join(',')
+    }
+    scrapeSearch(query, opts)
   }
 })
+
+function scrapeSearch (query, opts) {
+  debug('waiting for 5 sec')
+  setTimeout(function () {
+    search(query, opts, function (err, since_id) {
+      if (err) console.error(err)
+      opts.since_id = since_id
+      scrapeSearch(query, opts)
+    })
+  }, 5000)
+}
+
+function search (query, opts, cb) {
+  debug('searching for', opts)
+  opts.result_type = 'recent'
+  client.get('search/tweets', opts, function (err, data, response) {
+    if (err) {
+      if (err[0].code === 88) {
+        return rate(client, 'search', function (err, data, response) {
+          if (err) console.error(err)
+          var reset = data.resources.search['/search/tweets'].reset
+          var diff = new Date(reset * 1000) - new Date() + 500
+          debug('waiting for', diff / 1000, 'sec')
+          setTimeout(function () { cb(null, opts.since_id) }, diff)
+        })
+      }
+      return cb(err)
+    }
+    debug('got', data.statuses.length, 'tweets')
+    if (data.statuses.length === 0) return cb(null, opts.since_id)
+
+    var tweetStream = from.obj(data.statuses)
+    var since_id = data.statuses[0].id
+    var saveTweets = through.obj(function (data, enc, next) {
+      var tweet = convert(data)
+      query.tweets.create({data: tweet}, next)
+    })
+    pump(tweetStream, saveTweets, function (err) {
+      if (err) return cb(err)
+      return cb(null, since_id)
+    })
+  })
+}
