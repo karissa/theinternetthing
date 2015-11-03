@@ -1,9 +1,9 @@
 var from = require('from2')
 var pump = require('pump')
 var through = require('through2')
+var search = require('twitter-forever')
 var debug = require('debug')('theinternetthing')
 
-var search = require('./search.js')
 var convert = require('./convert.js')
 var server = require('../server/server.js')
 

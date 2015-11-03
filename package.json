@@ -25,6 +25,7 @@
     "ractive-toolkit": "^1.0.2",
     "serve-favicon": "^2.0.1",
     "through2": "^2.0.0",
+    "twitter-forever": "^1.0.0",
     "xhr": "^2.1.0"
   },
   "devDependencies": {
