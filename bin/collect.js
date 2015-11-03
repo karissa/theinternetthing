@@ -1,8 +1,7 @@
 var from = require('from2')
 var pump = require('pump')
 var through = require('through2')
-var search = require('twitter-forever')
-var debug = require('debug')('theinternetthing')
+var forever = require('twitter-forever')
 
 var convert = require('./convert.js')
 var server = require('../server/server.js')
@@ -23,7 +22,7 @@ Query.find({ where: { running: 'true' } }, function (err, queries) {
     var opts = {
       q: includes.join(',')
     }
-    var searcher = search(client, opts)
+    var searcher = forever(client, opts)
     searcher.on('data', function (tweets) {
       var tweetStream = from.obj(tweets)
       var saveTweets = through.obj(function (data, enc, next) {
@@ -33,6 +32,9 @@ Query.find({ where: { running: 'true' } }, function (err, queries) {
       pump(tweetStream, saveTweets, function (err) {
         if (err) console.error('boo', err)
       })
+    })
+    searcher.on('error', function (err) {
+      throw err
     })
   }
 })
