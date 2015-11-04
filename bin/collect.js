@@ -1,18 +1,13 @@
 var from = require('from2')
 var pump = require('pump')
 var through = require('through2')
-var forever = require('twitter-forever')
+var twitter = require('twitter-forever')
+var tumblr = require('tumblr')
 var debug = require('debug')('collect')
 
 var convert = require('./convert.js')
 var server = require('../server/server.js')
-
-var client = {
-  consumer_key: process.env.TWITTER_KEY,
-  consumer_secret: process.env.TWITTER_SECRET,
-  access_token_key: process.env.TWITTER_ACCESS_KEY,
-  access_token_secret: process.env.TWITTER_ACCESS_SECRET
-}
+var clients = require('../common/models/clients.js')
 
 var RUNNING = {}
 
@@ -26,7 +21,8 @@ function getQueries () {
     for (var i in queries) {
       var query = queries[i]
       if (!RUNNING[i] && query.running) {
-        RUNNING[i] = search(query)
+        RUNNING[i] = searchTwitter(query)
+        searchTumblr(query)
         debug('starting', query)
       }
       if (RUNNING[i] && !query.running) {
@@ -39,12 +35,16 @@ function getQueries () {
   })
 }
 
-function search (query) {
+function getText (query) {
   var includes = query.params.includes.map(function (item) { return item.value })
+  return includes.join(',')
+}
+
+function searchTwitter (query) {
   var opts = {
-    q: includes.join(',')
+    q: getText(query)
   }
-  var searcher = forever(client, opts)
+  var searcher = twitter(clients.twitter, opts)
   searcher.on('data', function (tweets) {
     var tweetStream = from.obj(tweets)
     var saveTweets = through.obj(function (data, enc, next) {
@@ -58,5 +58,14 @@ function search (query) {
   searcher.on('error', function (err) {
     console.error(err)
   })
+
   return searcher
+}
+
+function searchTumblr (query, cb) {
+  var searcher = new tumblr.Tagged(clients.tumblr)
+  var tag = getText(query)
+  searcher.search(tag, function (err, results) {
+    console.log(err, results)
+  })
 }
