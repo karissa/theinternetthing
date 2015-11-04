@@ -10,10 +10,7 @@
 {{#each this.params.includes}}
 <p>{{this.value}}</p>
 {{/each}}
-<h3>Excludes:</h3>
-{{#each this.params.excludes}}
-<p>{{this.value}}</p>
-{{/each}}
+<p>{{this.tweets.length}} tweets</p>
 <a href="#" on-click="delete:{{this.id}}">delete</a>
 <a href="/query/{{this.id}}">edit</a>
 {{#if this.running}}

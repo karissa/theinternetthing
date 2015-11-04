@@ -14,15 +14,6 @@
 <button type="submit" on-click="include">Add</button>
 </form>
 
-<form class="enter-means-submit">
-<h2>Exclude keywords:</h2>
-{{#each query.params.excludes}}
-<input type="text" placeholder="Value" value="{{this.value}}"/>
-{{/each}}
-<input type="text" placeholder="Value" name="exclude" value="{{newExclude}}"/>
-<button type="submit" on-click="exclude">Add</button>
-</form>
-
 {{#if showSql}}
 <h2>SQL query:</h2>
 <textarea name="" value={{query.params.sql}}>

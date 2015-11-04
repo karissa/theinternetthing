@@ -53,11 +53,10 @@ module.exports = {
 
     function pingTweets () {
       var query = self.get('query')
-      if (!query.running) return
       queries.call('GET', query.id + '/tweets?filter[order]=id%20desc', function (err, resp, data) {
         if (err) return console.error(err)
         self.set('tweets', data)
-        setTimeout(pingTweets, 2000)
+        if (query.running) setTimeout(pingTweets, 2000)
       })
     }
 
@@ -74,6 +73,7 @@ module.exports = {
       queries.call('GET', 'stop?id=' + id, function (err, resp, data) {
         if (err) return console.error(err)
         query.running = false
+        self.set('query', query)
       })
       event.original.preventDefault()
     })
@@ -82,6 +82,8 @@ module.exports = {
       queries.call('GET', 'start?id=' + id, function (err, resp, data) {
         if (err) return console.error(err)
         query.running = true
+        self.set('query', query)
+        pingTweets()
       })
       event.original.preventDefault()
     })

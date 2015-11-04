@@ -1,20 +1,39 @@
 module.exports = function (Query) {
   Query.stop = function (id, cb) {
-    Query.updateAll({id: id}, {running: false}, function (err, info) {
+    Query.findById(id, function (err, query) {
       if (err) throw err
-      return cb(null, info)
-    })
-  }
-
-  Query.start = function (id, cb) {
-    Query.findById(id, function (err, obj) {
-      if (err) throw err
-      obj.updateAttribute('running', true, function (err, obj) {
+      query.updateAttribute('running', false, function (err, obj) {
         if (err) throw err
         return cb(null, obj)
       })
     })
   }
+
+  Query.start = function (id, cb) {
+    Query.findById(id, function (err, query) {
+      if (err) throw err
+      query.updateAttribute('running', true, function (err, obj) {
+        if (err) throw err
+        return cb(null, obj)
+      })
+    })
+  }
+
+  Query.on('dataSourceAttached', function (query) {
+    var find = Query.find
+    Query.find = function (filter, opts, cb) {
+      if (!filter) filter = {}
+      if (typeof opts === 'function') cb = opts
+      console.log(arguments)
+      filter.include = 'tweets'
+      find.apply(this, [filter, function (err, results) {
+        for (var i in results) {
+          results[i].tweets = results[i].tweets.length
+        }
+        return cb(err, results)
+      }])
+    }
+  })
 
   Query.remoteMethod('stop', {
     http: {path: '/stop', verb: 'get'},
