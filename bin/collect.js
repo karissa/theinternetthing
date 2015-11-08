@@ -5,7 +5,7 @@ var twitter = require('twitter-forever')
 var tumblr = require('tumblr')
 var debug = require('debug')('collect')
 
-var convert = require('./convert.js')
+var tweet = require('./tweet.js')
 var server = require('../server/server.js')
 var clients = require('../common/models/clients.js')
 
@@ -22,7 +22,6 @@ function getQueries () {
       var query = queries[i]
       if (!RUNNING[i] && query.running) {
         RUNNING[i] = searchTwitter(query)
-        searchTumblr(query)
         debug('starting', query)
       }
       if (RUNNING[i] && !query.running) {
@@ -48,8 +47,7 @@ function searchTwitter (query) {
   searcher.on('data', function (tweets) {
     var tweetStream = from.obj(tweets)
     var saveTweets = through.obj(function (data, enc, next) {
-      var tweet = convert(data)
-      query.tweets.create({data: tweet}, next)
+      query.tweets.create({data: tweet(data)}, next)
     })
     pump(tweetStream, saveTweets, function (err) {
       if (err) console.error('boo', err)
@@ -65,7 +63,22 @@ function searchTwitter (query) {
 function searchTumblr (query, cb) {
   var searcher = new tumblr.Tagged(clients.tumblr)
   var tag = getText(query)
-  searcher.search(tag, function (err, results) {
-    console.log(err, results)
-  })
+  doit({})
+  function doit (opts) {
+    searcher.search(tag, opts, function (err, results) {
+      if (err) return console.error(err)
+      if (results.length === 0) return
+      var next_timestamp = 0
+      var posts = from.obj(results)
+      var timestamps = through.obj(function (data, enc, next) {
+        if (next_timestamp < data.timestamp) next_timestamp = data.timestamp
+        next(null, data)
+      })
+      pump(posts, timestamps, function (err) {
+        if (err) return console.error(err)
+        var opts = { next_timestamp: next_timestamp }
+        console.log(opts)
+      })
+    })
+  }
 }
