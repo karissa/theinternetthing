@@ -33,6 +33,24 @@ module.exports = {
   onrender: function () {
     var self = this
 
+    function createTweetChart (tweets) {
+      console.log(transformTweets(tweets))
+    }
+
+      function transformTweets (tweets) {
+        var values = []
+        for (var i in tweets) {
+          var tweet = tweets[i]
+          values.push({x: tweet.data.created_at, y: tweet.data.text.length})
+        }
+        return [
+          {
+            values: values,
+            key: 'Tweets'
+          }
+        ]
+      }
+
     function Keyword (value) {
       return {value: value}
     }
@@ -55,7 +73,7 @@ module.exports = {
       var query = self.get('query')
       queries.call('GET', query.id + '/tweets?filter[order]=id%20desc', function (err, resp, data) {
         if (err) return console.error(err)
-        self.set('tweets', data)
+        createTweetChart(data)
         if (query.running) setTimeout(pingTweets, 2000)
       })
     }
@@ -87,7 +105,6 @@ module.exports = {
       })
       event.original.preventDefault()
     })
-
 
     function done () {
       window.location.href = '/'
