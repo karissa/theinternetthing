@@ -7,6 +7,15 @@
     "validateUpsert": true
   },
   "properties": {
+    "tweet_id": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "date": {
+      "type": "date",
+      "required": true
+    },
     "data": {
       "type": "object",
       "required": true

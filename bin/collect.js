@@ -46,7 +46,7 @@ function searchTwitter (query) {
   searcher.on('data', function (tweets) {
     var tweetStream = from.obj(tweets)
     var saveTweets = through.obj(function (data, enc, next) {
-      query.tweets.create({data: tweet(data)}, next)
+      query.tweets.create(tweet(data), next)
     })
     pump(tweetStream, saveTweets, function (err) {
       if (err) console.error('boo', err)
