@@ -37,8 +37,9 @@ REST.prototype.post = function (data, cb) {
 }
 
 REST.prototype.put = function (data, cb) {
+  var url = data.id ? this.url + '/' + data.id : this.url
   var opts = {
-    url: this.url,
+    url: url,
     method: 'PUT',
     json: data
   }

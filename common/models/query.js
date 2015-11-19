@@ -21,6 +21,7 @@ module.exports = function (Query) {
 
   Query.on('dataSourceAttached', function (query) {
     var find = Query.find
+    // include the # of tweets in result as query.tweets
     Query.find = function (filter, opts, cb) {
       if (!filter) filter = {}
       if (typeof opts === 'function') cb = opts
@@ -35,15 +36,5 @@ module.exports = function (Query) {
     }
   })
 
-  Query.remoteMethod('stop', {
-    http: {path: '/stop', verb: 'get'},
-    accepts: {arg: 'id', type: 'number', http: {source: 'query'}},
-    returns: {arg: 'status', type: 'string'}
-  })
-  Query.remoteMethod('start', {
-    http: {path: '/start', verb: 'get'},
-    accepts: {arg: 'id', type: 'number', http: {source: 'query'}},
-    returns: {arg: 'status', type: 'string'}
-  })
   return Query
 }

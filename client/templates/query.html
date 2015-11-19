@@ -7,11 +7,16 @@
 
 <form class="enter-means-submit">
 <h2>Include keywords:</h2>
-{{#each query.params.includes}}
+{{#each query.params.includes:i}}
+<div class="row">
 <input type="text" placeholder="Value" name="include" value="{{this.value}}"/>
+<button on-click="delete:{{this.value}}">delete</button>
+</div>
 {{/each}}
+<div class="row">
 <input type="text" placeholder="Value" value="{{newInclude}}"/>
 <button type="submit" on-click="include">Add</button>
+</div>
 </form>
 
 {{#if showSql}}
@@ -20,10 +25,6 @@
 </textarea>
 <button type="submit" on-click="useSQL">Submit</button>
 {{/if}}
-
-<div class="row">
-<button type="submit" on-click="done">Done</button>
-</div>
 
 {{#if query.running}}
 <a href="#" on-click="stop:{{query.id}}">stop</a>

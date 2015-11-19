@@ -37,19 +37,19 @@ module.exports = {
       console.log(transformTweets(tweets))
     }
 
-      function transformTweets (tweets) {
-        var values = []
-        for (var i in tweets) {
-          var tweet = tweets[i]
-          values.push({x: tweet.data.created_at, y: tweet.data.text.length})
-        }
-        return [
-          {
-            values: values,
-            key: 'Tweets'
-          }
-        ]
+    function transformTweets (tweets) {
+      var values = []
+      for (var i in tweets) {
+        var tweet = tweets[i]
+        values.push({x: tweet.data.created_at, y: tweet.data.text.length})
       }
+      return [
+        {
+          values: values,
+          key: 'Tweets'
+        }
+      ]
+    }
 
     function Keyword (value) {
       return {value: value}
@@ -58,16 +58,17 @@ module.exports = {
     self.on('include', function (event) {
       var value = self.get('newInclude')
       query.params.includes.push(Keyword(value))
-      self.set('newInclude', null)
+
+      if (query.id) updateQuery(query, addDone)
+      else queries.post(query, addDone)
+
       event.original.preventDefault()
     })
 
-    self.on('exclude', function (event) {
-      var value = self.get('newExclude')
-      query.params.excludes.push(Keyword(value))
-      self.set('newExclude', null)
-      event.original.preventDefault()
-    })
+    function addDone (err, resp, body) {
+      if (err) console.error(err)
+      self.set('newInclude', null)
+    }
 
     function pingTweets () {
       var query = self.get('query')
@@ -80,34 +81,33 @@ module.exports = {
 
     pingTweets()
 
-    self.on('done', function () {
-      queries.post(query, function (err, resp, body) {
-        if (err) console.error(err)
-        done()
-      })
-    })
-
-    self.on('stop', function (event, id) {
-      queries.call('GET', 'stop?id=' + id, function (err, resp, data) {
-        if (err) return console.error(err)
-        query.running = false
-        self.set('query', query)
-      })
+    self.on('delete', function (event, id) {
+      query.params.includes = query.params.includes.filter(function (thing) { return thing.value !== id })
+      updateQuery(query)
       event.original.preventDefault()
     })
 
     self.on('start', function (event, id) {
-      queries.call('GET', 'start?id=' + id, function (err, resp, data) {
-        if (err) return console.error(err)
-        query.running = true
-        self.set('query', query)
+      event.original.preventDefault()
+      query.running = true
+      updateQuery(query, function (err) {
+        if (err) return
         pingTweets()
       })
-      event.original.preventDefault()
     })
 
-    function done () {
-      window.location.href = '/'
+    self.on('stop', function (event, id) {
+      event.original.preventDefault()
+      query.running = false
+      updateQuery(query)
+    })
+
+    function updateQuery (query, cb) {
+      queries.put(query, function (err, resp, data) {
+        if (err) return console.error(err)
+        self.set('query', query)
+        if (cb) cb(err, resp, data)
+      })
     }
   }
 }
