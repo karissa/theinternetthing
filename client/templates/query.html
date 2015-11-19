@@ -32,6 +32,9 @@
 <a href="#" on-click="start:{{query.id}}">start</a>
 {{/if}}
 
-<h3>{{tweets.length}} tweets</h3>
-<div id="chart">
+<h3>{{query.tweets.length}} tweets</h3>
+{{#each query.tweets}}
+<div class="row">
+  {{this.date}} | {{this.data.text}}
 </div>
+{{/each}}

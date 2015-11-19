@@ -74,7 +74,8 @@ module.exports = {
       var query = self.get('query')
       queries.call('GET', query.id + '/tweets?filter[order]=id%20desc', function (err, resp, data) {
         if (err) return console.error(err)
-        createTweetChart(data)
+        console.log(data.length)
+        self.set('query.tweets', data)
         if (query.running) setTimeout(pingTweets, 2000)
       })
     }
