@@ -2,7 +2,6 @@ var from = require('from2')
 var pump = require('pump')
 var through = require('through2')
 var twitter = require('twitter-forever')
-var tumblr = require('tumblr')
 var debug = require('debug')('collect')
 
 var tweet = require('./tweet.js')
@@ -58,27 +57,4 @@ function searchTwitter (query) {
   })
 
   return searcher
-}
-
-function searchTumblr (query, cb) {
-  var searcher = new tumblr.Tagged(clients.tumblr)
-  var tag = getText(query)
-  doit({})
-  function doit (opts) {
-    searcher.search(tag, opts, function (err, results) {
-      if (err) return console.error(err)
-      if (results.length === 0) return
-      var next_timestamp = 0
-      var posts = from.obj(results)
-      var timestamps = through.obj(function (data, enc, next) {
-        if (next_timestamp < data.timestamp) next_timestamp = data.timestamp
-        next(null, data)
-      })
-      pump(posts, timestamps, function (err) {
-        if (err) return console.error(err)
-        var opts = { next_timestamp: next_timestamp }
-        console.log(opts)
-      })
-    })
-  }
 }
